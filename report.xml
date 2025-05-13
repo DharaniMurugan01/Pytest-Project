@@ -1,0 +1,1017 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites><testsuite name="pytest" errors="5" failures="2" skipped="5" tests="36" time="457.926" timestamp="2025-05-13T08:02:30.499197+05:30" hostname="DESKTOP-7IL8GUR"><testcase classname="PytestDay1.test_Aseert" name="test_sample_one" time="0.003" /><testcase classname="PytestDay1.test_Aseert" name="test_sample_two" time="0.003" /><testcase classname="PytestDay1.test_Aseert" name="test_sample_three" time="0.002" /><testcase classname="PytestDay1.test_Fixture" name="test_validsearch[setup0]" time="27.570"><error message="failed on setup with &quot;selenium.common.exceptions.WebDriverException: Message: unknown error: net::ERR_CONNECTION_TIMED_OUT&#10;  (Session info: chrome=136.0.7103.93)&#10;Stacktrace:&#10;&#09;GetHandleVerifier [0x00007FF63A96CF25+75717]&#10;&#09;GetHandleVerifier [0x00007FF63A96CF80+75808]&#10;&#09;(No symbol) [0x00007FF63A738F9A]&#10;&#09;(No symbol) [0x00007FF63A7359F4]&#10;&#09;(No symbol) [0x00007FF63A726789]&#10;&#09;(No symbol) [0x00007FF63A7284F8]&#10;&#09;(No symbol) [0x00007FF63A726A96]&#10;&#09;(No symbol) [0x00007FF63A726516]&#10;&#09;(No symbol) [0x00007FF63A7261DA]&#10;&#09;(No symbol) [0x00007FF63A723E8A]&#10;&#09;(No symbol) [0x00007FF63A72465C]&#10;&#09;(No symbol) [0x00007FF63A73CF3A]&#10;&#09;(No symbol) [0x00007FF63A7E013E]&#10;&#09;(No symbol) [0x00007FF63A7B737A]&#10;&#09;(No symbol) [0x00007FF63A7DF39C]&#10;&#09;(No symbol) [0x00007FF63A7B7153]&#10;&#09;(No symbol) [0x00007FF63A780421]&#10;&#09;(No symbol) [0x00007FF63A7811B3]&#10;&#09;GetHandleVerifier [0x00007FF63AC6D6FD+3223453]&#10;&#09;GetHandleVerifier [0x00007FF63AC67CA2+3200322]&#10;&#09;GetHandleVerifier [0x00007FF63AC85AD3+3322739]&#10;&#09;GetHandleVerifier [0x00007FF63A9869FA+180890]&#10;&#09;GetHandleVerifier [0x00007FF63A98E0FF+211359]&#10;&#09;GetHandleVerifier [0x00007FF63A975274+109332]&#10;&#09;GetHandleVerifier [0x00007FF63A975422+109762]&#10;&#09;GetHandleVerifier [0x00007FF63A95BA39+4825]&#10;&#09;BaseThreadInitThunk [0x00007FF9D65F7034+20]&#10;&#09;RtlUserThreadStart [0x00007FF9D83E26A1+33]&quot;">request = &lt;SubRequest 'setup' for &lt;Function test_validsearch[setup0]&gt;&gt;
+
+    @pytest.fixture(params=[("chrome", "https://tutorialsninja.com/demo/"),
+                            ("edge", "https://tutorialsninja.com/demo/")])
+    def setup(request):
+        browser, url = request.param
+        if browser.lower() == "chrome":
+            driver = webdriver.Chrome()
+        elif browser.lower() == "edge":
+            driver = webdriver.Edge()
+        else:
+            pytest.skip("Unsupported browser")
+        driver.maximize_window()
+        driver.implicitly_wait(5)
+&gt;       driver.get(url)
+
+PytestDay1\test_Fixture.py:16: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+C:\Users\ADMIN\AppData\Local\Programs\Python\Python313\Lib\site-packages\selenium\webdriver\remote\webdriver.py:473: in get
+    self.execute(Command.GET, {"url": url})
+C:\Users\ADMIN\AppData\Local\Programs\Python\Python313\Lib\site-packages\selenium\webdriver\remote\webdriver.py:448: in execute
+    self.error_handler.check_response(response)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;selenium.webdriver.remote.errorhandler.ErrorHandler object at 0x00000212862F06E0&gt;
+response = {'status': 500, 'value': '{"value":{"error":"unknown error","message":"unknown error: net::ERR_CONNECTION_TIMED_OUT\\n...3A95BA39+4825]\\n\\tBaseThreadInitThunk [0x00007FF9D65F7034+20]\\n\\tRtlUserThreadStart [0x00007FF9D83E26A1+33]\\n"}}'}
+
+    def check_response(self, response: Dict[str, Any]) -&gt; None:
+        """Checks that a JSON response from the WebDriver does not have an
+        error.
+    
+        :Args:
+         - response - The JSON response from the WebDriver server as a dictionary
+           object.
+    
+        :Raises: If the response contains an error message.
+        """
+        status = response.get("status", None)
+        if not status or status == ErrorCode.SUCCESS:
+            return
+        value = None
+        message = response.get("message", "")
+        screen: str = response.get("screen", "")
+        stacktrace = None
+        if isinstance(status, int):
+            value_json = response.get("value", None)
+            if value_json and isinstance(value_json, str):
+                import json
+    
+                try:
+                    value = json.loads(value_json)
+                    if len(value) == 1:
+                        value = value["value"]
+                    status = value.get("error", None)
+                    if not status:
+                        status = value.get("status", ErrorCode.UNKNOWN_ERROR)
+                        message = value.get("value") or value.get("message")
+                        if not isinstance(message, str):
+                            value = message
+                            message = message.get("message")
+                    else:
+                        message = value.get("message", None)
+                except ValueError:
+                    pass
+    
+        exception_class: Type[WebDriverException]
+        e = ErrorCode()
+        error_codes = [item for item in dir(e) if not item.startswith("__")]
+        for error_code in error_codes:
+            error_info = getattr(ErrorCode, error_code)
+            if isinstance(error_info, list) and status in error_info:
+                exception_class = getattr(ExceptionMapping, error_code, WebDriverException)
+                break
+        else:
+            exception_class = WebDriverException
+    
+        if not value:
+            value = response["value"]
+        if isinstance(value, str):
+            raise exception_class(value)
+        if message == "" and "message" in value:
+            message = value["message"]
+    
+        screen = None  # type: ignore[assignment]
+        if "screen" in value:
+            screen = value["screen"]
+    
+        stacktrace = None
+        st_value = value.get("stackTrace") or value.get("stacktrace")
+        if st_value:
+            if isinstance(st_value, str):
+                stacktrace = st_value.split("\n")
+            else:
+                stacktrace = []
+                try:
+                    for frame in st_value:
+                        line = frame.get("lineNumber", "")
+                        file = frame.get("fileName", "&lt;anonymous&gt;")
+                        if line:
+                            file = f"{file}:{line}"
+                        meth = frame.get("methodName", "&lt;anonymous&gt;")
+                        if "className" in frame:
+                            meth = f"{frame['className']}.{meth}"
+                        msg = "    at %s (%s)"
+                        msg = msg % (meth, file)
+                        stacktrace.append(msg)
+                except TypeError:
+                    pass
+        if exception_class == UnexpectedAlertPresentException:
+            alert_text = None
+            if "data" in value:
+                alert_text = value["data"].get("text")
+            elif "alert" in value:
+                alert_text = value["alert"].get("text")
+            raise exception_class(message, screen, stacktrace, alert_text)  # type: ignore[call-arg]  # mypy is not smart enough here
+&gt;       raise exception_class(message, screen, stacktrace)
+E       selenium.common.exceptions.WebDriverException: Message: unknown error: net::ERR_CONNECTION_TIMED_OUT
+E         (Session info: chrome=136.0.7103.93)
+E       Stacktrace:
+E       	GetHandleVerifier [0x00007FF63A96CF25+75717]
+E       	GetHandleVerifier [0x00007FF63A96CF80+75808]
+E       	(No symbol) [0x00007FF63A738F9A]
+E       	(No symbol) [0x00007FF63A7359F4]
+E       	(No symbol) [0x00007FF63A726789]
+E       	(No symbol) [0x00007FF63A7284F8]
+E       	(No symbol) [0x00007FF63A726A96]
+E       	(No symbol) [0x00007FF63A726516]
+E       	(No symbol) [0x00007FF63A7261DA]
+E       	(No symbol) [0x00007FF63A723E8A]
+E       	(No symbol) [0x00007FF63A72465C]
+E       	(No symbol) [0x00007FF63A73CF3A]
+E       	(No symbol) [0x00007FF63A7E013E]
+E       	(No symbol) [0x00007FF63A7B737A]
+E       	(No symbol) [0x00007FF63A7DF39C]
+E       	(No symbol) [0x00007FF63A7B7153]
+E       	(No symbol) [0x00007FF63A780421]
+E       	(No symbol) [0x00007FF63A7811B3]
+E       	GetHandleVerifier [0x00007FF63AC6D6FD+3223453]
+E       	GetHandleVerifier [0x00007FF63AC67CA2+3200322]
+E       	GetHandleVerifier [0x00007FF63AC85AD3+3322739]
+E       	GetHandleVerifier [0x00007FF63A9869FA+180890]
+E       	GetHandleVerifier [0x00007FF63A98E0FF+211359]
+E       	GetHandleVerifier [0x00007FF63A975274+109332]
+E       	GetHandleVerifier [0x00007FF63A975422+109762]
+E       	GetHandleVerifier [0x00007FF63A95BA39+4825]
+E       	BaseThreadInitThunk [0x00007FF9D65F7034+20]
+E       	RtlUserThreadStart [0x00007FF9D83E26A1+33]
+
+C:\Users\ADMIN\AppData\Local\Programs\Python\Python313\Lib\site-packages\selenium\webdriver\remote\errorhandler.py:232: WebDriverException</error></testcase><testcase classname="PytestDay1.test_Fixture" name="test_validsearch[setup1]" time="65.011"><error message="failed on setup with &quot;selenium.common.exceptions.WebDriverException: Message: unknown error: net::ERR_CONNECTION_TIMED_OUT&#10;  (Session info: MicrosoftEdge=136.0.3240.64)&#10;Stacktrace:&#10;&#09;GetHandleVerifier [0x00007FF69FFDFCA5+25029]&#10;&#09;(No symbol) [0x00007FF69FF34CB0]&#10;&#09;Microsoft::Applications::Events::EventProperty::to_string [0x00007FF6A023ADAA+1947706]&#10;&#09;(No symbol) [0x00007FF69FCF8A30]&#10;&#09;(No symbol) [0x00007FF69FCECE6F]&#10;&#09;(No symbol) [0x00007FF69FCEE4CD]&#10;&#09;(No symbol) [0x00007FF69FCED0D9]&#10;&#09;(No symbol) [0x00007FF69FCECCDC]&#10;&#09;(No symbol) [0x00007FF69FCECA28]&#10;&#09;(No symbol) [0x00007FF69FCEAA69]&#10;&#09;(No symbol) [0x00007FF69FCEB03C]&#10;&#09;(No symbol) [0x00007FF69FCFF06A]&#10;&#09;(No symbol) [0x00007FF69FD86D1E]&#10;&#09;(No symbol) [0x00007FF69FD6908A]&#10;&#09;(No symbol) [0x00007FF69FD3E15D]&#10;&#09;(No symbol) [0x00007FF69FD86698]&#10;&#09;(No symbol) [0x00007FF69FD68DF3]&#10;&#09;(No symbol) [0x00007FF69FD3D6A6]&#10;&#09;(No symbol) [0x00007FF69FD3CBB3]&#10;&#09;(No symbol) [0x00007FF69FD3D4D3]&#10;&#09;(No symbol) [0x00007FF69FE45D0D]&#10;&#09;(No symbol) [0x00007FF69FE538AF]&#10;&#09;(No symbol) [0x00007FF69FE4C29F]&#10;&#09;Microsoft::Applications::Events::EventProperty::to_string [0x00007FF6A00A4D5A+284650]&#10;&#09;(No symbol) [0x00007FF69FF42641]&#10;&#09;(No symbol) [0x00007FF69FF3B0E4]&#10;&#09;(No symbol) [0x00007FF69FF3B233]&#10;&#09;(No symbol) [0x00007FF69FF2CE76]&#10;&#09;BaseThreadInitThunk [0x00007FF9D65F7034+20]&#10;&#09;RtlUserThreadStart [0x00007FF9D83E26A1+33]&quot;">request = &lt;SubRequest 'setup' for &lt;Function test_validsearch[setup1]&gt;&gt;
+
+    @pytest.fixture(params=[("chrome", "https://tutorialsninja.com/demo/"),
+                            ("edge", "https://tutorialsninja.com/demo/")])
+    def setup(request):
+        browser, url = request.param
+        if browser.lower() == "chrome":
+            driver = webdriver.Chrome()
+        elif browser.lower() == "edge":
+            driver = webdriver.Edge()
+        else:
+            pytest.skip("Unsupported browser")
+        driver.maximize_window()
+        driver.implicitly_wait(5)
+&gt;       driver.get(url)
+
+PytestDay1\test_Fixture.py:16: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+C:\Users\ADMIN\AppData\Local\Programs\Python\Python313\Lib\site-packages\selenium\webdriver\remote\webdriver.py:473: in get
+    self.execute(Command.GET, {"url": url})
+C:\Users\ADMIN\AppData\Local\Programs\Python\Python313\Lib\site-packages\selenium\webdriver\remote\webdriver.py:448: in execute
+    self.error_handler.check_response(response)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;selenium.webdriver.remote.errorhandler.ErrorHandler object at 0x00000212862D2490&gt;
+response = {'status': 500, 'value': '{"value":{"error":"unknown error","message":"unknown error: net::ERR_CONNECTION_TIMED_OUT\\n...07FF69FF2CE76]\\n\\tBaseThreadInitThunk [0x00007FF9D65F7034+20]\\n\\tRtlUserThreadStart [0x00007FF9D83E26A1+33]\\n"}}'}
+
+    def check_response(self, response: Dict[str, Any]) -&gt; None:
+        """Checks that a JSON response from the WebDriver does not have an
+        error.
+    
+        :Args:
+         - response - The JSON response from the WebDriver server as a dictionary
+           object.
+    
+        :Raises: If the response contains an error message.
+        """
+        status = response.get("status", None)
+        if not status or status == ErrorCode.SUCCESS:
+            return
+        value = None
+        message = response.get("message", "")
+        screen: str = response.get("screen", "")
+        stacktrace = None
+        if isinstance(status, int):
+            value_json = response.get("value", None)
+            if value_json and isinstance(value_json, str):
+                import json
+    
+                try:
+                    value = json.loads(value_json)
+                    if len(value) == 1:
+                        value = value["value"]
+                    status = value.get("error", None)
+                    if not status:
+                        status = value.get("status", ErrorCode.UNKNOWN_ERROR)
+                        message = value.get("value") or value.get("message")
+                        if not isinstance(message, str):
+                            value = message
+                            message = message.get("message")
+                    else:
+                        message = value.get("message", None)
+                except ValueError:
+                    pass
+    
+        exception_class: Type[WebDriverException]
+        e = ErrorCode()
+        error_codes = [item for item in dir(e) if not item.startswith("__")]
+        for error_code in error_codes:
+            error_info = getattr(ErrorCode, error_code)
+            if isinstance(error_info, list) and status in error_info:
+                exception_class = getattr(ExceptionMapping, error_code, WebDriverException)
+                break
+        else:
+            exception_class = WebDriverException
+    
+        if not value:
+            value = response["value"]
+        if isinstance(value, str):
+            raise exception_class(value)
+        if message == "" and "message" in value:
+            message = value["message"]
+    
+        screen = None  # type: ignore[assignment]
+        if "screen" in value:
+            screen = value["screen"]
+    
+        stacktrace = None
+        st_value = value.get("stackTrace") or value.get("stacktrace")
+        if st_value:
+            if isinstance(st_value, str):
+                stacktrace = st_value.split("\n")
+            else:
+                stacktrace = []
+                try:
+                    for frame in st_value:
+                        line = frame.get("lineNumber", "")
+                        file = frame.get("fileName", "&lt;anonymous&gt;")
+                        if line:
+                            file = f"{file}:{line}"
+                        meth = frame.get("methodName", "&lt;anonymous&gt;")
+                        if "className" in frame:
+                            meth = f"{frame['className']}.{meth}"
+                        msg = "    at %s (%s)"
+                        msg = msg % (meth, file)
+                        stacktrace.append(msg)
+                except TypeError:
+                    pass
+        if exception_class == UnexpectedAlertPresentException:
+            alert_text = None
+            if "data" in value:
+                alert_text = value["data"].get("text")
+            elif "alert" in value:
+                alert_text = value["alert"].get("text")
+            raise exception_class(message, screen, stacktrace, alert_text)  # type: ignore[call-arg]  # mypy is not smart enough here
+&gt;       raise exception_class(message, screen, stacktrace)
+E       selenium.common.exceptions.WebDriverException: Message: unknown error: net::ERR_CONNECTION_TIMED_OUT
+E         (Session info: MicrosoftEdge=136.0.3240.64)
+E       Stacktrace:
+E       	GetHandleVerifier [0x00007FF69FFDFCA5+25029]
+E       	(No symbol) [0x00007FF69FF34CB0]
+E       	Microsoft::Applications::Events::EventProperty::to_string [0x00007FF6A023ADAA+1947706]
+E       	(No symbol) [0x00007FF69FCF8A30]
+E       	(No symbol) [0x00007FF69FCECE6F]
+E       	(No symbol) [0x00007FF69FCEE4CD]
+E       	(No symbol) [0x00007FF69FCED0D9]
+E       	(No symbol) [0x00007FF69FCECCDC]
+E       	(No symbol) [0x00007FF69FCECA28]
+E       	(No symbol) [0x00007FF69FCEAA69]
+E       	(No symbol) [0x00007FF69FCEB03C]
+E       	(No symbol) [0x00007FF69FCFF06A]
+E       	(No symbol) [0x00007FF69FD86D1E]
+E       	(No symbol) [0x00007FF69FD6908A]
+E       	(No symbol) [0x00007FF69FD3E15D]
+E       	(No symbol) [0x00007FF69FD86698]
+E       	(No symbol) [0x00007FF69FD68DF3]
+E       	(No symbol) [0x00007FF69FD3D6A6]
+E       	(No symbol) [0x00007FF69FD3CBB3]
+E       	(No symbol) [0x00007FF69FD3D4D3]
+E       	(No symbol) [0x00007FF69FE45D0D]
+E       	(No symbol) [0x00007FF69FE538AF]
+E       	(No symbol) [0x00007FF69FE4C29F]
+E       	Microsoft::Applications::Events::EventProperty::to_string [0x00007FF6A00A4D5A+284650]
+E       	(No symbol) [0x00007FF69FF42641]
+E       	(No symbol) [0x00007FF69FF3B0E4]
+E       	(No symbol) [0x00007FF69FF3B233]
+E       	(No symbol) [0x00007FF69FF2CE76]
+E       	BaseThreadInitThunk [0x00007FF9D65F7034+20]
+E       	RtlUserThreadStart [0x00007FF9D83E26A1+33]
+
+C:\Users\ADMIN\AppData\Local\Programs\Python\Python313\Lib\site-packages\selenium\webdriver\remote\errorhandler.py:232: WebDriverException</error></testcase><testcase classname="PytestDay1.test_Fixture" name="test_Invalidsearch[setup0]" time="28.816"><error message="failed on setup with &quot;selenium.common.exceptions.WebDriverException: Message: unknown error: net::ERR_CONNECTION_TIMED_OUT&#10;  (Session info: chrome=136.0.7103.93)&#10;Stacktrace:&#10;&#09;GetHandleVerifier [0x00007FF63A96CF25+75717]&#10;&#09;GetHandleVerifier [0x00007FF63A96CF80+75808]&#10;&#09;(No symbol) [0x00007FF63A738F9A]&#10;&#09;(No symbol) [0x00007FF63A7359F4]&#10;&#09;(No symbol) [0x00007FF63A726789]&#10;&#09;(No symbol) [0x00007FF63A7284F8]&#10;&#09;(No symbol) [0x00007FF63A726A96]&#10;&#09;(No symbol) [0x00007FF63A726516]&#10;&#09;(No symbol) [0x00007FF63A7261DA]&#10;&#09;(No symbol) [0x00007FF63A723E8A]&#10;&#09;(No symbol) [0x00007FF63A72465C]&#10;&#09;(No symbol) [0x00007FF63A73CF3A]&#10;&#09;(No symbol) [0x00007FF63A7E013E]&#10;&#09;(No symbol) [0x00007FF63A7B737A]&#10;&#09;(No symbol) [0x00007FF63A7DF39C]&#10;&#09;(No symbol) [0x00007FF63A7B7153]&#10;&#09;(No symbol) [0x00007FF63A780421]&#10;&#09;(No symbol) [0x00007FF63A7811B3]&#10;&#09;GetHandleVerifier [0x00007FF63AC6D6FD+3223453]&#10;&#09;GetHandleVerifier [0x00007FF63AC67CA2+3200322]&#10;&#09;GetHandleVerifier [0x00007FF63AC85AD3+3322739]&#10;&#09;GetHandleVerifier [0x00007FF63A9869FA+180890]&#10;&#09;GetHandleVerifier [0x00007FF63A98E0FF+211359]&#10;&#09;GetHandleVerifier [0x00007FF63A975274+109332]&#10;&#09;GetHandleVerifier [0x00007FF63A975422+109762]&#10;&#09;GetHandleVerifier [0x00007FF63A95BA39+4825]&#10;&#09;BaseThreadInitThunk [0x00007FF9D65F7034+20]&#10;&#09;RtlUserThreadStart [0x00007FF9D83E26A1+33]&quot;">request = &lt;SubRequest 'setup' for &lt;Function test_Invalidsearch[setup0]&gt;&gt;
+
+    @pytest.fixture(params=[("chrome", "https://tutorialsninja.com/demo/"),
+                            ("edge", "https://tutorialsninja.com/demo/")])
+    def setup(request):
+        browser, url = request.param
+        if browser.lower() == "chrome":
+            driver = webdriver.Chrome()
+        elif browser.lower() == "edge":
+            driver = webdriver.Edge()
+        else:
+            pytest.skip("Unsupported browser")
+        driver.maximize_window()
+        driver.implicitly_wait(5)
+&gt;       driver.get(url)
+
+PytestDay1\test_Fixture.py:16: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+C:\Users\ADMIN\AppData\Local\Programs\Python\Python313\Lib\site-packages\selenium\webdriver\remote\webdriver.py:473: in get
+    self.execute(Command.GET, {"url": url})
+C:\Users\ADMIN\AppData\Local\Programs\Python\Python313\Lib\site-packages\selenium\webdriver\remote\webdriver.py:448: in execute
+    self.error_handler.check_response(response)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;selenium.webdriver.remote.errorhandler.ErrorHandler object at 0x00000212863B02D0&gt;
+response = {'status': 500, 'value': '{"value":{"error":"unknown error","message":"unknown error: net::ERR_CONNECTION_TIMED_OUT\\n...3A95BA39+4825]\\n\\tBaseThreadInitThunk [0x00007FF9D65F7034+20]\\n\\tRtlUserThreadStart [0x00007FF9D83E26A1+33]\\n"}}'}
+
+    def check_response(self, response: Dict[str, Any]) -&gt; None:
+        """Checks that a JSON response from the WebDriver does not have an
+        error.
+    
+        :Args:
+         - response - The JSON response from the WebDriver server as a dictionary
+           object.
+    
+        :Raises: If the response contains an error message.
+        """
+        status = response.get("status", None)
+        if not status or status == ErrorCode.SUCCESS:
+            return
+        value = None
+        message = response.get("message", "")
+        screen: str = response.get("screen", "")
+        stacktrace = None
+        if isinstance(status, int):
+            value_json = response.get("value", None)
+            if value_json and isinstance(value_json, str):
+                import json
+    
+                try:
+                    value = json.loads(value_json)
+                    if len(value) == 1:
+                        value = value["value"]
+                    status = value.get("error", None)
+                    if not status:
+                        status = value.get("status", ErrorCode.UNKNOWN_ERROR)
+                        message = value.get("value") or value.get("message")
+                        if not isinstance(message, str):
+                            value = message
+                            message = message.get("message")
+                    else:
+                        message = value.get("message", None)
+                except ValueError:
+                    pass
+    
+        exception_class: Type[WebDriverException]
+        e = ErrorCode()
+        error_codes = [item for item in dir(e) if not item.startswith("__")]
+        for error_code in error_codes:
+            error_info = getattr(ErrorCode, error_code)
+            if isinstance(error_info, list) and status in error_info:
+                exception_class = getattr(ExceptionMapping, error_code, WebDriverException)
+                break
+        else:
+            exception_class = WebDriverException
+    
+        if not value:
+            value = response["value"]
+        if isinstance(value, str):
+            raise exception_class(value)
+        if message == "" and "message" in value:
+            message = value["message"]
+    
+        screen = None  # type: ignore[assignment]
+        if "screen" in value:
+            screen = value["screen"]
+    
+        stacktrace = None
+        st_value = value.get("stackTrace") or value.get("stacktrace")
+        if st_value:
+            if isinstance(st_value, str):
+                stacktrace = st_value.split("\n")
+            else:
+                stacktrace = []
+                try:
+                    for frame in st_value:
+                        line = frame.get("lineNumber", "")
+                        file = frame.get("fileName", "&lt;anonymous&gt;")
+                        if line:
+                            file = f"{file}:{line}"
+                        meth = frame.get("methodName", "&lt;anonymous&gt;")
+                        if "className" in frame:
+                            meth = f"{frame['className']}.{meth}"
+                        msg = "    at %s (%s)"
+                        msg = msg % (meth, file)
+                        stacktrace.append(msg)
+                except TypeError:
+                    pass
+        if exception_class == UnexpectedAlertPresentException:
+            alert_text = None
+            if "data" in value:
+                alert_text = value["data"].get("text")
+            elif "alert" in value:
+                alert_text = value["alert"].get("text")
+            raise exception_class(message, screen, stacktrace, alert_text)  # type: ignore[call-arg]  # mypy is not smart enough here
+&gt;       raise exception_class(message, screen, stacktrace)
+E       selenium.common.exceptions.WebDriverException: Message: unknown error: net::ERR_CONNECTION_TIMED_OUT
+E         (Session info: chrome=136.0.7103.93)
+E       Stacktrace:
+E       	GetHandleVerifier [0x00007FF63A96CF25+75717]
+E       	GetHandleVerifier [0x00007FF63A96CF80+75808]
+E       	(No symbol) [0x00007FF63A738F9A]
+E       	(No symbol) [0x00007FF63A7359F4]
+E       	(No symbol) [0x00007FF63A726789]
+E       	(No symbol) [0x00007FF63A7284F8]
+E       	(No symbol) [0x00007FF63A726A96]
+E       	(No symbol) [0x00007FF63A726516]
+E       	(No symbol) [0x00007FF63A7261DA]
+E       	(No symbol) [0x00007FF63A723E8A]
+E       	(No symbol) [0x00007FF63A72465C]
+E       	(No symbol) [0x00007FF63A73CF3A]
+E       	(No symbol) [0x00007FF63A7E013E]
+E       	(No symbol) [0x00007FF63A7B737A]
+E       	(No symbol) [0x00007FF63A7DF39C]
+E       	(No symbol) [0x00007FF63A7B7153]
+E       	(No symbol) [0x00007FF63A780421]
+E       	(No symbol) [0x00007FF63A7811B3]
+E       	GetHandleVerifier [0x00007FF63AC6D6FD+3223453]
+E       	GetHandleVerifier [0x00007FF63AC67CA2+3200322]
+E       	GetHandleVerifier [0x00007FF63AC85AD3+3322739]
+E       	GetHandleVerifier [0x00007FF63A9869FA+180890]
+E       	GetHandleVerifier [0x00007FF63A98E0FF+211359]
+E       	GetHandleVerifier [0x00007FF63A975274+109332]
+E       	GetHandleVerifier [0x00007FF63A975422+109762]
+E       	GetHandleVerifier [0x00007FF63A95BA39+4825]
+E       	BaseThreadInitThunk [0x00007FF9D65F7034+20]
+E       	RtlUserThreadStart [0x00007FF9D83E26A1+33]
+
+C:\Users\ADMIN\AppData\Local\Programs\Python\Python313\Lib\site-packages\selenium\webdriver\remote\errorhandler.py:232: WebDriverException</error></testcase><testcase classname="PytestDay1.test_Fixture" name="test_Invalidsearch[setup1]" time="70.774"><failure message="selenium.common.exceptions.NoSuchElementException: Message: no such element: Unable to locate element: {&quot;method&quot;:&quot;xpath&quot;,&quot;selector&quot;:&quot;//input[@name='search']&quot;}&#10;  (Session info: MicrosoftEdge=136.0.3240.64); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#no-such-element-exception&#10;Stacktrace:&#10;&#09;GetHandleVerifier [0x00007FF69FFDFCA5+25029]&#10;&#09;(No symbol) [0x00007FF69FF34CB0]&#10;&#09;Microsoft::Applications::Events::EventProperty::to_string [0x00007FF6A023ADAA+1947706]&#10;&#09;(No symbol) [0x00007FF69FD47D88]&#10;&#09;(No symbol) [0x00007FF69FD4804B]&#10;&#09;(No symbol) [0x00007FF69FD88CA7]&#10;&#09;(No symbol) [0x00007FF69FD690CF]&#10;&#09;(No symbol) [0x00007FF69FD3E15D]&#10;&#09;(No symbol) [0x00007FF69FD86698]&#10;&#09;(No symbol) [0x00007FF69FD68DF3]&#10;&#09;(No symbol) [0x00007FF69FD3D6A6]&#10;&#09;(No symbol) [0x00007FF69FD3CBB3]&#10;&#09;(No symbol) [0x00007FF69FD3D4D3]&#10;&#09;(No symbol) [0x00007FF69FE45D0D]&#10;&#09;(No symbol) [0x00007FF69FE538AF]&#10;&#09;(No symbol) [0x00007FF69FE4C29F]&#10;&#09;Microsoft::Applications::Events::EventProperty::to_string [0x00007FF6A00A4D5A+284650]&#10;&#09;(No symbol) [0x00007FF69FF42641]&#10;&#09;(No symbol) [0x00007FF69FF3B0E4]&#10;&#09;(No symbol) [0x00007FF69FF3B233]&#10;&#09;(No symbol) [0x00007FF69FF2CE76]&#10;&#09;BaseThreadInitThunk [0x00007FF9D65F7034+20]&#10;&#09;RtlUserThreadStart [0x00007FF9D83E26A1+33]">setup = &lt;selenium.webdriver.edge.webdriver.WebDriver (session="d09136155fc8dfe87fa56fd6de52a9e3")&gt;
+
+    def test_Invalidsearch(setup):
+        driver = setup
+&gt;       driver.find_element(By.XPATH, "//input[@name='search']").send_keys("")
+
+PytestDay1\test_Fixture.py:26: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+C:\Users\ADMIN\AppData\Local\Programs\Python\Python313\Lib\site-packages\selenium\webdriver\remote\webdriver.py:917: in find_element
+    return self.execute(Command.FIND_ELEMENT, {"using": by, "value": value})["value"]
+C:\Users\ADMIN\AppData\Local\Programs\Python\Python313\Lib\site-packages\selenium\webdriver\remote\webdriver.py:448: in execute
+    self.error_handler.check_response(response)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;selenium.webdriver.remote.errorhandler.ErrorHandler object at 0x00000212862CE780&gt;
+response = {'status': 404, 'value': '{"value":{"error":"no such element","message":"no such element: Unable to locate element: {\...07FF69FF2CE76]\\n\\tBaseThreadInitThunk [0x00007FF9D65F7034+20]\\n\\tRtlUserThreadStart [0x00007FF9D83E26A1+33]\\n"}}'}
+
+    def check_response(self, response: Dict[str, Any]) -&gt; None:
+        """Checks that a JSON response from the WebDriver does not have an
+        error.
+    
+        :Args:
+         - response - The JSON response from the WebDriver server as a dictionary
+           object.
+    
+        :Raises: If the response contains an error message.
+        """
+        status = response.get("status", None)
+        if not status or status == ErrorCode.SUCCESS:
+            return
+        value = None
+        message = response.get("message", "")
+        screen: str = response.get("screen", "")
+        stacktrace = None
+        if isinstance(status, int):
+            value_json = response.get("value", None)
+            if value_json and isinstance(value_json, str):
+                import json
+    
+                try:
+                    value = json.loads(value_json)
+                    if len(value) == 1:
+                        value = value["value"]
+                    status = value.get("error", None)
+                    if not status:
+                        status = value.get("status", ErrorCode.UNKNOWN_ERROR)
+                        message = value.get("value") or value.get("message")
+                        if not isinstance(message, str):
+                            value = message
+                            message = message.get("message")
+                    else:
+                        message = value.get("message", None)
+                except ValueError:
+                    pass
+    
+        exception_class: Type[WebDriverException]
+        e = ErrorCode()
+        error_codes = [item for item in dir(e) if not item.startswith("__")]
+        for error_code in error_codes:
+            error_info = getattr(ErrorCode, error_code)
+            if isinstance(error_info, list) and status in error_info:
+                exception_class = getattr(ExceptionMapping, error_code, WebDriverException)
+                break
+        else:
+            exception_class = WebDriverException
+    
+        if not value:
+            value = response["value"]
+        if isinstance(value, str):
+            raise exception_class(value)
+        if message == "" and "message" in value:
+            message = value["message"]
+    
+        screen = None  # type: ignore[assignment]
+        if "screen" in value:
+            screen = value["screen"]
+    
+        stacktrace = None
+        st_value = value.get("stackTrace") or value.get("stacktrace")
+        if st_value:
+            if isinstance(st_value, str):
+                stacktrace = st_value.split("\n")
+            else:
+                stacktrace = []
+                try:
+                    for frame in st_value:
+                        line = frame.get("lineNumber", "")
+                        file = frame.get("fileName", "&lt;anonymous&gt;")
+                        if line:
+                            file = f"{file}:{line}"
+                        meth = frame.get("methodName", "&lt;anonymous&gt;")
+                        if "className" in frame:
+                            meth = f"{frame['className']}.{meth}"
+                        msg = "    at %s (%s)"
+                        msg = msg % (meth, file)
+                        stacktrace.append(msg)
+                except TypeError:
+                    pass
+        if exception_class == UnexpectedAlertPresentException:
+            alert_text = None
+            if "data" in value:
+                alert_text = value["data"].get("text")
+            elif "alert" in value:
+                alert_text = value["alert"].get("text")
+            raise exception_class(message, screen, stacktrace, alert_text)  # type: ignore[call-arg]  # mypy is not smart enough here
+&gt;       raise exception_class(message, screen, stacktrace)
+E       selenium.common.exceptions.NoSuchElementException: Message: no such element: Unable to locate element: {"method":"xpath","selector":"//input[@name='search']"}
+E         (Session info: MicrosoftEdge=136.0.3240.64); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#no-such-element-exception
+E       Stacktrace:
+E       	GetHandleVerifier [0x00007FF69FFDFCA5+25029]
+E       	(No symbol) [0x00007FF69FF34CB0]
+E       	Microsoft::Applications::Events::EventProperty::to_string [0x00007FF6A023ADAA+1947706]
+E       	(No symbol) [0x00007FF69FD47D88]
+E       	(No symbol) [0x00007FF69FD4804B]
+E       	(No symbol) [0x00007FF69FD88CA7]
+E       	(No symbol) [0x00007FF69FD690CF]
+E       	(No symbol) [0x00007FF69FD3E15D]
+E       	(No symbol) [0x00007FF69FD86698]
+E       	(No symbol) [0x00007FF69FD68DF3]
+E       	(No symbol) [0x00007FF69FD3D6A6]
+E       	(No symbol) [0x00007FF69FD3CBB3]
+E       	(No symbol) [0x00007FF69FD3D4D3]
+E       	(No symbol) [0x00007FF69FE45D0D]
+E       	(No symbol) [0x00007FF69FE538AF]
+E       	(No symbol) [0x00007FF69FE4C29F]
+E       	Microsoft::Applications::Events::EventProperty::to_string [0x00007FF6A00A4D5A+284650]
+E       	(No symbol) [0x00007FF69FF42641]
+E       	(No symbol) [0x00007FF69FF3B0E4]
+E       	(No symbol) [0x00007FF69FF3B233]
+E       	(No symbol) [0x00007FF69FF2CE76]
+E       	BaseThreadInitThunk [0x00007FF9D65F7034+20]
+E       	RtlUserThreadStart [0x00007FF9D83E26A1+33]
+
+C:\Users\ADMIN\AppData\Local\Programs\Python\Python313\Lib\site-packages\selenium\webdriver\remote\errorhandler.py:232: NoSuchElementException</failure></testcase><testcase classname="PytestDay1.test_Fixture" name="test_emptysearch[setup0]" time="26.948"><error message="failed on setup with &quot;selenium.common.exceptions.WebDriverException: Message: unknown error: net::ERR_CONNECTION_TIMED_OUT&#10;  (Session info: chrome=136.0.7103.93)&#10;Stacktrace:&#10;&#09;GetHandleVerifier [0x00007FF63A96CF25+75717]&#10;&#09;GetHandleVerifier [0x00007FF63A96CF80+75808]&#10;&#09;(No symbol) [0x00007FF63A738F9A]&#10;&#09;(No symbol) [0x00007FF63A7359F4]&#10;&#09;(No symbol) [0x00007FF63A726789]&#10;&#09;(No symbol) [0x00007FF63A7284F8]&#10;&#09;(No symbol) [0x00007FF63A726A96]&#10;&#09;(No symbol) [0x00007FF63A726516]&#10;&#09;(No symbol) [0x00007FF63A7261DA]&#10;&#09;(No symbol) [0x00007FF63A723E8A]&#10;&#09;(No symbol) [0x00007FF63A72465C]&#10;&#09;(No symbol) [0x00007FF63A73CF3A]&#10;&#09;(No symbol) [0x00007FF63A7E013E]&#10;&#09;(No symbol) [0x00007FF63A7B737A]&#10;&#09;(No symbol) [0x00007FF63A7DF39C]&#10;&#09;(No symbol) [0x00007FF63A7B7153]&#10;&#09;(No symbol) [0x00007FF63A780421]&#10;&#09;(No symbol) [0x00007FF63A7811B3]&#10;&#09;GetHandleVerifier [0x00007FF63AC6D6FD+3223453]&#10;&#09;GetHandleVerifier [0x00007FF63AC67CA2+3200322]&#10;&#09;GetHandleVerifier [0x00007FF63AC85AD3+3322739]&#10;&#09;GetHandleVerifier [0x00007FF63A9869FA+180890]&#10;&#09;GetHandleVerifier [0x00007FF63A98E0FF+211359]&#10;&#09;GetHandleVerifier [0x00007FF63A975274+109332]&#10;&#09;GetHandleVerifier [0x00007FF63A975422+109762]&#10;&#09;GetHandleVerifier [0x00007FF63A95BA39+4825]&#10;&#09;BaseThreadInitThunk [0x00007FF9D65F7034+20]&#10;&#09;RtlUserThreadStart [0x00007FF9D83E26A1+33]&quot;">request = &lt;SubRequest 'setup' for &lt;Function test_emptysearch[setup0]&gt;&gt;
+
+    @pytest.fixture(params=[("chrome", "https://tutorialsninja.com/demo/"),
+                            ("edge", "https://tutorialsninja.com/demo/")])
+    def setup(request):
+        browser, url = request.param
+        if browser.lower() == "chrome":
+            driver = webdriver.Chrome()
+        elif browser.lower() == "edge":
+            driver = webdriver.Edge()
+        else:
+            pytest.skip("Unsupported browser")
+        driver.maximize_window()
+        driver.implicitly_wait(5)
+&gt;       driver.get(url)
+
+PytestDay1\test_Fixture.py:16: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+C:\Users\ADMIN\AppData\Local\Programs\Python\Python313\Lib\site-packages\selenium\webdriver\remote\webdriver.py:473: in get
+    self.execute(Command.GET, {"url": url})
+C:\Users\ADMIN\AppData\Local\Programs\Python\Python313\Lib\site-packages\selenium\webdriver\remote\webdriver.py:448: in execute
+    self.error_handler.check_response(response)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;selenium.webdriver.remote.errorhandler.ErrorHandler object at 0x00000212862CF5C0&gt;
+response = {'status': 500, 'value': '{"value":{"error":"unknown error","message":"unknown error: net::ERR_CONNECTION_TIMED_OUT\\n...3A95BA39+4825]\\n\\tBaseThreadInitThunk [0x00007FF9D65F7034+20]\\n\\tRtlUserThreadStart [0x00007FF9D83E26A1+33]\\n"}}'}
+
+    def check_response(self, response: Dict[str, Any]) -&gt; None:
+        """Checks that a JSON response from the WebDriver does not have an
+        error.
+    
+        :Args:
+         - response - The JSON response from the WebDriver server as a dictionary
+           object.
+    
+        :Raises: If the response contains an error message.
+        """
+        status = response.get("status", None)
+        if not status or status == ErrorCode.SUCCESS:
+            return
+        value = None
+        message = response.get("message", "")
+        screen: str = response.get("screen", "")
+        stacktrace = None
+        if isinstance(status, int):
+            value_json = response.get("value", None)
+            if value_json and isinstance(value_json, str):
+                import json
+    
+                try:
+                    value = json.loads(value_json)
+                    if len(value) == 1:
+                        value = value["value"]
+                    status = value.get("error", None)
+                    if not status:
+                        status = value.get("status", ErrorCode.UNKNOWN_ERROR)
+                        message = value.get("value") or value.get("message")
+                        if not isinstance(message, str):
+                            value = message
+                            message = message.get("message")
+                    else:
+                        message = value.get("message", None)
+                except ValueError:
+                    pass
+    
+        exception_class: Type[WebDriverException]
+        e = ErrorCode()
+        error_codes = [item for item in dir(e) if not item.startswith("__")]
+        for error_code in error_codes:
+            error_info = getattr(ErrorCode, error_code)
+            if isinstance(error_info, list) and status in error_info:
+                exception_class = getattr(ExceptionMapping, error_code, WebDriverException)
+                break
+        else:
+            exception_class = WebDriverException
+    
+        if not value:
+            value = response["value"]
+        if isinstance(value, str):
+            raise exception_class(value)
+        if message == "" and "message" in value:
+            message = value["message"]
+    
+        screen = None  # type: ignore[assignment]
+        if "screen" in value:
+            screen = value["screen"]
+    
+        stacktrace = None
+        st_value = value.get("stackTrace") or value.get("stacktrace")
+        if st_value:
+            if isinstance(st_value, str):
+                stacktrace = st_value.split("\n")
+            else:
+                stacktrace = []
+                try:
+                    for frame in st_value:
+                        line = frame.get("lineNumber", "")
+                        file = frame.get("fileName", "&lt;anonymous&gt;")
+                        if line:
+                            file = f"{file}:{line}"
+                        meth = frame.get("methodName", "&lt;anonymous&gt;")
+                        if "className" in frame:
+                            meth = f"{frame['className']}.{meth}"
+                        msg = "    at %s (%s)"
+                        msg = msg % (meth, file)
+                        stacktrace.append(msg)
+                except TypeError:
+                    pass
+        if exception_class == UnexpectedAlertPresentException:
+            alert_text = None
+            if "data" in value:
+                alert_text = value["data"].get("text")
+            elif "alert" in value:
+                alert_text = value["alert"].get("text")
+            raise exception_class(message, screen, stacktrace, alert_text)  # type: ignore[call-arg]  # mypy is not smart enough here
+&gt;       raise exception_class(message, screen, stacktrace)
+E       selenium.common.exceptions.WebDriverException: Message: unknown error: net::ERR_CONNECTION_TIMED_OUT
+E         (Session info: chrome=136.0.7103.93)
+E       Stacktrace:
+E       	GetHandleVerifier [0x00007FF63A96CF25+75717]
+E       	GetHandleVerifier [0x00007FF63A96CF80+75808]
+E       	(No symbol) [0x00007FF63A738F9A]
+E       	(No symbol) [0x00007FF63A7359F4]
+E       	(No symbol) [0x00007FF63A726789]
+E       	(No symbol) [0x00007FF63A7284F8]
+E       	(No symbol) [0x00007FF63A726A96]
+E       	(No symbol) [0x00007FF63A726516]
+E       	(No symbol) [0x00007FF63A7261DA]
+E       	(No symbol) [0x00007FF63A723E8A]
+E       	(No symbol) [0x00007FF63A72465C]
+E       	(No symbol) [0x00007FF63A73CF3A]
+E       	(No symbol) [0x00007FF63A7E013E]
+E       	(No symbol) [0x00007FF63A7B737A]
+E       	(No symbol) [0x00007FF63A7DF39C]
+E       	(No symbol) [0x00007FF63A7B7153]
+E       	(No symbol) [0x00007FF63A780421]
+E       	(No symbol) [0x00007FF63A7811B3]
+E       	GetHandleVerifier [0x00007FF63AC6D6FD+3223453]
+E       	GetHandleVerifier [0x00007FF63AC67CA2+3200322]
+E       	GetHandleVerifier [0x00007FF63AC85AD3+3322739]
+E       	GetHandleVerifier [0x00007FF63A9869FA+180890]
+E       	GetHandleVerifier [0x00007FF63A98E0FF+211359]
+E       	GetHandleVerifier [0x00007FF63A975274+109332]
+E       	GetHandleVerifier [0x00007FF63A975422+109762]
+E       	GetHandleVerifier [0x00007FF63A95BA39+4825]
+E       	BaseThreadInitThunk [0x00007FF9D65F7034+20]
+E       	RtlUserThreadStart [0x00007FF9D83E26A1+33]
+
+C:\Users\ADMIN\AppData\Local\Programs\Python\Python313\Lib\site-packages\selenium\webdriver\remote\errorhandler.py:232: WebDriverException</error></testcase><testcase classname="PytestDay1.test_Fixture" name="test_emptysearch[setup1]" time="49.239"><error message="failed on setup with &quot;selenium.common.exceptions.WebDriverException: Message: unknown error: net::ERR_CONNECTION_TIMED_OUT&#10;  (Session info: MicrosoftEdge=136.0.3240.64)&#10;Stacktrace:&#10;&#09;GetHandleVerifier [0x00007FF69FFDFCA5+25029]&#10;&#09;(No symbol) [0x00007FF69FF34CB0]&#10;&#09;Microsoft::Applications::Events::EventProperty::to_string [0x00007FF6A023ADAA+1947706]&#10;&#09;(No symbol) [0x00007FF69FCF8A30]&#10;&#09;(No symbol) [0x00007FF69FCECE6F]&#10;&#09;(No symbol) [0x00007FF69FCEE4CD]&#10;&#09;(No symbol) [0x00007FF69FCED0D9]&#10;&#09;(No symbol) [0x00007FF69FCECCDC]&#10;&#09;(No symbol) [0x00007FF69FCECA28]&#10;&#09;(No symbol) [0x00007FF69FCEAA69]&#10;&#09;(No symbol) [0x00007FF69FCEB03C]&#10;&#09;(No symbol) [0x00007FF69FCFF06A]&#10;&#09;(No symbol) [0x00007FF69FD86D1E]&#10;&#09;(No symbol) [0x00007FF69FD6908A]&#10;&#09;(No symbol) [0x00007FF69FD3E15D]&#10;&#09;(No symbol) [0x00007FF69FD86698]&#10;&#09;(No symbol) [0x00007FF69FD68DF3]&#10;&#09;(No symbol) [0x00007FF69FD3D6A6]&#10;&#09;(No symbol) [0x00007FF69FD3CBB3]&#10;&#09;(No symbol) [0x00007FF69FD3D4D3]&#10;&#09;(No symbol) [0x00007FF69FE45D0D]&#10;&#09;(No symbol) [0x00007FF69FE538AF]&#10;&#09;(No symbol) [0x00007FF69FE4C29F]&#10;&#09;Microsoft::Applications::Events::EventProperty::to_string [0x00007FF6A00A4D5A+284650]&#10;&#09;(No symbol) [0x00007FF69FF42641]&#10;&#09;(No symbol) [0x00007FF69FF3B0E4]&#10;&#09;(No symbol) [0x00007FF69FF3B233]&#10;&#09;(No symbol) [0x00007FF69FF2CE76]&#10;&#09;BaseThreadInitThunk [0x00007FF9D65F7034+20]&#10;&#09;RtlUserThreadStart [0x00007FF9D83E26A1+33]&quot;">request = &lt;SubRequest 'setup' for &lt;Function test_emptysearch[setup1]&gt;&gt;
+
+    @pytest.fixture(params=[("chrome", "https://tutorialsninja.com/demo/"),
+                            ("edge", "https://tutorialsninja.com/demo/")])
+    def setup(request):
+        browser, url = request.param
+        if browser.lower() == "chrome":
+            driver = webdriver.Chrome()
+        elif browser.lower() == "edge":
+            driver = webdriver.Edge()
+        else:
+            pytest.skip("Unsupported browser")
+        driver.maximize_window()
+        driver.implicitly_wait(5)
+&gt;       driver.get(url)
+
+PytestDay1\test_Fixture.py:16: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+C:\Users\ADMIN\AppData\Local\Programs\Python\Python313\Lib\site-packages\selenium\webdriver\remote\webdriver.py:473: in get
+    self.execute(Command.GET, {"url": url})
+C:\Users\ADMIN\AppData\Local\Programs\Python\Python313\Lib\site-packages\selenium\webdriver\remote\webdriver.py:448: in execute
+    self.error_handler.check_response(response)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;selenium.webdriver.remote.errorhandler.ErrorHandler object at 0x00000212862BF410&gt;
+response = {'status': 500, 'value': '{"value":{"error":"unknown error","message":"unknown error: net::ERR_CONNECTION_TIMED_OUT\\n...07FF69FF2CE76]\\n\\tBaseThreadInitThunk [0x00007FF9D65F7034+20]\\n\\tRtlUserThreadStart [0x00007FF9D83E26A1+33]\\n"}}'}
+
+    def check_response(self, response: Dict[str, Any]) -&gt; None:
+        """Checks that a JSON response from the WebDriver does not have an
+        error.
+    
+        :Args:
+         - response - The JSON response from the WebDriver server as a dictionary
+           object.
+    
+        :Raises: If the response contains an error message.
+        """
+        status = response.get("status", None)
+        if not status or status == ErrorCode.SUCCESS:
+            return
+        value = None
+        message = response.get("message", "")
+        screen: str = response.get("screen", "")
+        stacktrace = None
+        if isinstance(status, int):
+            value_json = response.get("value", None)
+            if value_json and isinstance(value_json, str):
+                import json
+    
+                try:
+                    value = json.loads(value_json)
+                    if len(value) == 1:
+                        value = value["value"]
+                    status = value.get("error", None)
+                    if not status:
+                        status = value.get("status", ErrorCode.UNKNOWN_ERROR)
+                        message = value.get("value") or value.get("message")
+                        if not isinstance(message, str):
+                            value = message
+                            message = message.get("message")
+                    else:
+                        message = value.get("message", None)
+                except ValueError:
+                    pass
+    
+        exception_class: Type[WebDriverException]
+        e = ErrorCode()
+        error_codes = [item for item in dir(e) if not item.startswith("__")]
+        for error_code in error_codes:
+            error_info = getattr(ErrorCode, error_code)
+            if isinstance(error_info, list) and status in error_info:
+                exception_class = getattr(ExceptionMapping, error_code, WebDriverException)
+                break
+        else:
+            exception_class = WebDriverException
+    
+        if not value:
+            value = response["value"]
+        if isinstance(value, str):
+            raise exception_class(value)
+        if message == "" and "message" in value:
+            message = value["message"]
+    
+        screen = None  # type: ignore[assignment]
+        if "screen" in value:
+            screen = value["screen"]
+    
+        stacktrace = None
+        st_value = value.get("stackTrace") or value.get("stacktrace")
+        if st_value:
+            if isinstance(st_value, str):
+                stacktrace = st_value.split("\n")
+            else:
+                stacktrace = []
+                try:
+                    for frame in st_value:
+                        line = frame.get("lineNumber", "")
+                        file = frame.get("fileName", "&lt;anonymous&gt;")
+                        if line:
+                            file = f"{file}:{line}"
+                        meth = frame.get("methodName", "&lt;anonymous&gt;")
+                        if "className" in frame:
+                            meth = f"{frame['className']}.{meth}"
+                        msg = "    at %s (%s)"
+                        msg = msg % (meth, file)
+                        stacktrace.append(msg)
+                except TypeError:
+                    pass
+        if exception_class == UnexpectedAlertPresentException:
+            alert_text = None
+            if "data" in value:
+                alert_text = value["data"].get("text")
+            elif "alert" in value:
+                alert_text = value["alert"].get("text")
+            raise exception_class(message, screen, stacktrace, alert_text)  # type: ignore[call-arg]  # mypy is not smart enough here
+&gt;       raise exception_class(message, screen, stacktrace)
+E       selenium.common.exceptions.WebDriverException: Message: unknown error: net::ERR_CONNECTION_TIMED_OUT
+E         (Session info: MicrosoftEdge=136.0.3240.64)
+E       Stacktrace:
+E       	GetHandleVerifier [0x00007FF69FFDFCA5+25029]
+E       	(No symbol) [0x00007FF69FF34CB0]
+E       	Microsoft::Applications::Events::EventProperty::to_string [0x00007FF6A023ADAA+1947706]
+E       	(No symbol) [0x00007FF69FCF8A30]
+E       	(No symbol) [0x00007FF69FCECE6F]
+E       	(No symbol) [0x00007FF69FCEE4CD]
+E       	(No symbol) [0x00007FF69FCED0D9]
+E       	(No symbol) [0x00007FF69FCECCDC]
+E       	(No symbol) [0x00007FF69FCECA28]
+E       	(No symbol) [0x00007FF69FCEAA69]
+E       	(No symbol) [0x00007FF69FCEB03C]
+E       	(No symbol) [0x00007FF69FCFF06A]
+E       	(No symbol) [0x00007FF69FD86D1E]
+E       	(No symbol) [0x00007FF69FD6908A]
+E       	(No symbol) [0x00007FF69FD3E15D]
+E       	(No symbol) [0x00007FF69FD86698]
+E       	(No symbol) [0x00007FF69FD68DF3]
+E       	(No symbol) [0x00007FF69FD3D6A6]
+E       	(No symbol) [0x00007FF69FD3CBB3]
+E       	(No symbol) [0x00007FF69FD3D4D3]
+E       	(No symbol) [0x00007FF69FE45D0D]
+E       	(No symbol) [0x00007FF69FE538AF]
+E       	(No symbol) [0x00007FF69FE4C29F]
+E       	Microsoft::Applications::Events::EventProperty::to_string [0x00007FF6A00A4D5A+284650]
+E       	(No symbol) [0x00007FF69FF42641]
+E       	(No symbol) [0x00007FF69FF3B0E4]
+E       	(No symbol) [0x00007FF69FF3B233]
+E       	(No symbol) [0x00007FF69FF2CE76]
+E       	BaseThreadInitThunk [0x00007FF9D65F7034+20]
+E       	RtlUserThreadStart [0x00007FF9D83E26A1+33]
+
+C:\Users\ADMIN\AppData\Local\Programs\Python\Python313\Lib\site-packages\selenium\webdriver\remote\errorhandler.py:232: WebDriverException</error></testcase><testcase classname="PytestDay1.test_Parameterize" name="test_square[2-4]" time="0.004" /><testcase classname="PytestDay1.test_Parameterize" name="test_square[3-9]" time="0.031" /><testcase classname="PytestDay1.test_Parameterize" name="test_square[4-16]" time="0.002" /><testcase classname="PytestDay1.test_Parameterize" name="test_square[7-49]" time="0.002" /><testcase classname="PytestDay1.test_marker" name="test_sample1" time="0.004" /><testcase classname="PytestDay1.test_marker" name="test_sample2" time="0.004" /><testcase classname="PytestDay1.test_marker" name="test_sample" time="0.008" /><testcase classname="PytestDay1.test_sendgoogle" name="test_google_search[selenium]" time="12.828"><failure message="selenium.common.exceptions.ElementNotInteractableException: Message: element not interactable&#10;  (Session info: chrome=136.0.7103.93)&#10;Stacktrace:&#10;&#09;GetHandleVerifier [0x00007FF63A96CF25+75717]&#10;&#09;GetHandleVerifier [0x00007FF63A96CF80+75808]&#10;&#09;(No symbol) [0x00007FF63A738DCC]&#10;&#09;(No symbol) [0x00007FF63A7909C4]&#10;&#09;(No symbol) [0x00007FF63A782394]&#10;&#09;(No symbol) [0x00007FF63A7B737A]&#10;&#09;(No symbol) [0x00007FF63A781C46]&#10;&#09;(No symbol) [0x00007FF63A7B7590]&#10;&#09;(No symbol) [0x00007FF63A7DF39C]&#10;&#09;(No symbol) [0x00007FF63A7B7153]&#10;&#09;(No symbol) [0x00007FF63A780421]&#10;&#09;(No symbol) [0x00007FF63A7811B3]&#10;&#09;GetHandleVerifier [0x00007FF63AC6D6FD+3223453]&#10;&#09;GetHandleVerifier [0x00007FF63AC67CA2+3200322]&#10;&#09;GetHandleVerifier [0x00007FF63AC85AD3+3322739]&#10;&#09;GetHandleVerifier [0x00007FF63A9869FA+180890]&#10;&#09;GetHandleVerifier [0x00007FF63A98E0FF+211359]&#10;&#09;GetHandleVerifier [0x00007FF63A975274+109332]&#10;&#09;GetHandleVerifier [0x00007FF63A975422+109762]&#10;&#09;GetHandleVerifier [0x00007FF63A95BA39+4825]&#10;&#09;BaseThreadInitThunk [0x00007FF9D65F7034+20]&#10;&#09;RtlUserThreadStart [0x00007FF9D83E26A1+33]">search_term = 'selenium'
+
+    @pytest.mark.parametrize('search_term',[('selenium'),('pytest'),('selenium locators')])
+    def test_google_search(search_term):
+        driver=webdriver.Chrome()
+        driver.maximize_window()
+        driver.get("https://www.google.co.in/")
+        driver.find_element(By.NAME,"q").send_keys(search_term)
+        time.sleep(3)
+&gt;       driver.find_element(By.CLASS_NAME,"gNO89b").click()
+
+PytestDay1\test_sendgoogle.py:13: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+C:\Users\ADMIN\AppData\Local\Programs\Python\Python313\Lib\site-packages\selenium\webdriver\remote\webelement.py:119: in click
+    self._execute(Command.CLICK_ELEMENT)
+C:\Users\ADMIN\AppData\Local\Programs\Python\Python313\Lib\site-packages\selenium\webdriver\remote\webelement.py:572: in _execute
+    return self._parent.execute(command, params)
+C:\Users\ADMIN\AppData\Local\Programs\Python\Python313\Lib\site-packages\selenium\webdriver\remote\webdriver.py:448: in execute
+    self.error_handler.check_response(response)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;selenium.webdriver.remote.errorhandler.ErrorHandler object at 0x00000212862B9AE0&gt;
+response = {'status': 400, 'value': '{"value":{"error":"element not interactable","message":"element not interactable\\n  (Sessio...3A95BA39+4825]\\n\\tBaseThreadInitThunk [0x00007FF9D65F7034+20]\\n\\tRtlUserThreadStart [0x00007FF9D83E26A1+33]\\n"}}'}
+
+    def check_response(self, response: Dict[str, Any]) -&gt; None:
+        """Checks that a JSON response from the WebDriver does not have an
+        error.
+    
+        :Args:
+         - response - The JSON response from the WebDriver server as a dictionary
+           object.
+    
+        :Raises: If the response contains an error message.
+        """
+        status = response.get("status", None)
+        if not status or status == ErrorCode.SUCCESS:
+            return
+        value = None
+        message = response.get("message", "")
+        screen: str = response.get("screen", "")
+        stacktrace = None
+        if isinstance(status, int):
+            value_json = response.get("value", None)
+            if value_json and isinstance(value_json, str):
+                import json
+    
+                try:
+                    value = json.loads(value_json)
+                    if len(value) == 1:
+                        value = value["value"]
+                    status = value.get("error", None)
+                    if not status:
+                        status = value.get("status", ErrorCode.UNKNOWN_ERROR)
+                        message = value.get("value") or value.get("message")
+                        if not isinstance(message, str):
+                            value = message
+                            message = message.get("message")
+                    else:
+                        message = value.get("message", None)
+                except ValueError:
+                    pass
+    
+        exception_class: Type[WebDriverException]
+        e = ErrorCode()
+        error_codes = [item for item in dir(e) if not item.startswith("__")]
+        for error_code in error_codes:
+            error_info = getattr(ErrorCode, error_code)
+            if isinstance(error_info, list) and status in error_info:
+                exception_class = getattr(ExceptionMapping, error_code, WebDriverException)
+                break
+        else:
+            exception_class = WebDriverException
+    
+        if not value:
+            value = response["value"]
+        if isinstance(value, str):
+            raise exception_class(value)
+        if message == "" and "message" in value:
+            message = value["message"]
+    
+        screen = None  # type: ignore[assignment]
+        if "screen" in value:
+            screen = value["screen"]
+    
+        stacktrace = None
+        st_value = value.get("stackTrace") or value.get("stacktrace")
+        if st_value:
+            if isinstance(st_value, str):
+                stacktrace = st_value.split("\n")
+            else:
+                stacktrace = []
+                try:
+                    for frame in st_value:
+                        line = frame.get("lineNumber", "")
+                        file = frame.get("fileName", "&lt;anonymous&gt;")
+                        if line:
+                            file = f"{file}:{line}"
+                        meth = frame.get("methodName", "&lt;anonymous&gt;")
+                        if "className" in frame:
+                            meth = f"{frame['className']}.{meth}"
+                        msg = "    at %s (%s)"
+                        msg = msg % (meth, file)
+                        stacktrace.append(msg)
+                except TypeError:
+                    pass
+        if exception_class == UnexpectedAlertPresentException:
+            alert_text = None
+            if "data" in value:
+                alert_text = value["data"].get("text")
+            elif "alert" in value:
+                alert_text = value["alert"].get("text")
+            raise exception_class(message, screen, stacktrace, alert_text)  # type: ignore[call-arg]  # mypy is not smart enough here
+&gt;       raise exception_class(message, screen, stacktrace)
+E       selenium.common.exceptions.ElementNotInteractableException: Message: element not interactable
+E         (Session info: chrome=136.0.7103.93)
+E       Stacktrace:
+E       	GetHandleVerifier [0x00007FF63A96CF25+75717]
+E       	GetHandleVerifier [0x00007FF63A96CF80+75808]
+E       	(No symbol) [0x00007FF63A738DCC]
+E       	(No symbol) [0x00007FF63A7909C4]
+E       	(No symbol) [0x00007FF63A782394]
+E       	(No symbol) [0x00007FF63A7B737A]
+E       	(No symbol) [0x00007FF63A781C46]
+E       	(No symbol) [0x00007FF63A7B7590]
+E       	(No symbol) [0x00007FF63A7DF39C]
+E       	(No symbol) [0x00007FF63A7B7153]
+E       	(No symbol) [0x00007FF63A780421]
+E       	(No symbol) [0x00007FF63A7811B3]
+E       	GetHandleVerifier [0x00007FF63AC6D6FD+3223453]
+E       	GetHandleVerifier [0x00007FF63AC67CA2+3200322]
+E       	GetHandleVerifier [0x00007FF63AC85AD3+3322739]
+E       	GetHandleVerifier [0x00007FF63A9869FA+180890]
+E       	GetHandleVerifier [0x00007FF63A98E0FF+211359]
+E       	GetHandleVerifier [0x00007FF63A975274+109332]
+E       	GetHandleVerifier [0x00007FF63A975422+109762]
+E       	GetHandleVerifier [0x00007FF63A95BA39+4825]
+E       	BaseThreadInitThunk [0x00007FF9D65F7034+20]
+E       	RtlUserThreadStart [0x00007FF9D83E26A1+33]
+
+C:\Users\ADMIN\AppData\Local\Programs\Python\Python313\Lib\site-packages\selenium\webdriver\remote\errorhandler.py:232: ElementNotInteractableException</failure></testcase><testcase classname="PytestDay1.test_sendgoogle" name="test_google_search[pytest]" time="29.513" /><testcase classname="PytestDay1.test_sendgoogle" name="test_google_search[selenium locators]" time="25.377" /><testcase classname="PytestDay1.test_skiptest" name="test_sample_one" time="0.004" /><testcase classname="PytestDay1.test_skiptest" name="test_sample_two" time="0.003" /><testcase classname="PytestDay1.test_skiptest" name="test_sample_three" time="0.003" /><testcase classname="PytestDay1.test_skiptest" name="test_feature" time="0.005"><skipped type="pytest.skip" message="Not ready yet">D:\PytestPractice\PytestDay1\test_skiptest.py:16: Not ready yet</skipped></testcase><testcase classname="PytestDay1.test_skiptest" name="test_known_bug" time="0.015"><skipped type="pytest.xfail" message="Bug not fixed" /></testcase><testcase classname="PytestDay1.test_skiptest" name="test_linux_feature" time="0.001"><skipped type="pytest.skip" message="Not supported on Windows">D:\PytestPractice\PytestDay1\test_skiptest.py:26: Not supported on Windows</skipped></testcase><testcase classname="PytestDay1.test_skiptest" name="test_failes" time="0.001"><skipped type="pytest.skip" message="wrong word">D:\PytestPractice\PytestDay1\test_skiptest.py:30: wrong word</skipped></testcase><testcase classname="PytestDay1.test_task1" name="test_sample_one" time="0.003" /><testcase classname="PytestDay1.test_task1" name="test_sample_two" time="0.008" /><testcase classname="PytestDay1.test_task1" name="test_sample_three" time="0.002" /><testcase classname="PytestDay1.test_task2" name="test_browser[chrome-https://www.flipkart.com/]" time="19.928" /><testcase classname="PytestDay1.test_task2" name="test_browser[chrome-https://www.amazon.in/]" time="26.065" /><testcase classname="PytestDay1.test_task2" name="test_browser[firefox-https://www.flipkart.com/]" time="32.810" /><testcase classname="PytestDay1.test_task2" name="test_browser[firefox-https://www.amazon.in/]" time="30.130" /><testcase classname="PytestDay1.test_xfail" name="test_sample1" time="0.002"><skipped type="pytest.xfail" message="expected to be failure" /></testcase><testcase classname="PytestDay1.test_xfail" name="test_sample2" time="0.003" /><testcase classname="PytestDay1.test_xfail" name="test_sample3" time="0.003" /></testsuite></testsuites>
